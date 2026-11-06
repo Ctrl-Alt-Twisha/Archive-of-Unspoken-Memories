@@ -469,8 +469,8 @@ function setPrompt(t){pr.classList.remove('on');setTimeout(()=>{pr.textContent=t
     const u=()=>{removeEventListener('pointerdown',u,true);removeEventListener('keydown',u,true);try{ac()}catch(_){}setPrompt('');go()};
     addEventListener('pointerdown',u,true);addEventListener('keydown',u,true)});
 })();
-const LOCKS=["images/lock-1.jpg","images/lock-2.jpg","images/lock-3.jpg","images/lock-4.jpg","images/lock-5.jpg"];
-const POS=['50% 50%','30% 25%','65% 55%','50% 80%','40% 40%'];
+const LOCKS=["images/lock-1.jpg","images/lock-2.jpg","images/lock-3.jpg","images/lock-4.jpg","images/lock-5.jpg","images/lock-6.jpg","images/lock-7.jpg","images/lock-8.jpg"];
+const POS=['50% 50%','30% 25%','65% 55%','50% 80%','40% 40%','50% 65%','50% 50%','72% 55%'];
 function throwPhotos(){
   if(wall.childElementCount)return;
   const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?3:6,rows=mob?5:4,cw=W/cols,rh=H/rows;
