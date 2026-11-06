@@ -33,7 +33,8 @@ Deno.serve(async (req) => {
       supabaseAnonKey,
       { global: { headers: { Authorization: authorization } } },
     )
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const token = authorization.replace(/^Bearer\s+/i, '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     if (authError || !user) return json({ error: 'Sign in to save a letter' }, 401)
 
     let input: Record<string, unknown>
