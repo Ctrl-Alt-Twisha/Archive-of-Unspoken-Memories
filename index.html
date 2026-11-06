@@ -150,16 +150,22 @@ body.pre .envelope{opacity:0}
 #title p{font-style:italic;color:#9a6b12;margin-top:.35em;font-size:clamp(.9rem,2.4vw,1.25rem)}
 #title.gone{opacity:0;transform:translateY(-14px)}
 @media (max-height:620px){#title p{display:none}#title h2{font-size:clamp(1.2rem,4vw,1.8rem)}}
-#home{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(14px,env(safe-area-inset-top));left:14px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;cursor:pointer;font:inherit;font-size:.8rem;color:var(--ink)}
-#newl{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(14px,env(safe-area-inset-top));left:68px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;cursor:pointer;font:inherit;font-size:.8rem;color:var(--ink)}
+#home,#newl,#archive{width:52px;height:54px;padding:2px 0;justify-content:center;text-align:center;line-height:1.05;font-size:.68rem}
+#home{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(12px,env(safe-area-inset-top));left:10px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:0;cursor:pointer;font:inherit;font-size:.68rem;color:var(--ink)}
+#newl{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(12px,env(safe-area-inset-top));left:70px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:0;cursor:pointer;font:inherit;font-size:.68rem;color:var(--ink)}
 body.letter #newl,body.writing #newl{color:#fbf1d9}
-body.writing #home,body.writing #newl{background:rgba(20,12,6,.6);border-radius:10px;padding:4px 7px}
+body.letter #archive,body.writing #archive{color:#fbf1d9}
+body.writing #home,body.writing #newl,body.writing #archive{background:rgba(20,12,6,.6);border-radius:10px;padding:4px 7px}
 #newl.show{opacity:1;visibility:visible;pointer-events:auto}
 #newl svg{width:38px;height:28px}
+#archive svg{width:38px;height:28px}
 #newl:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+#archive:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 #home.show{opacity:1;visibility:visible;pointer-events:auto}
 #home svg{width:38px;height:auto}
 #home:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+#archive{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(12px,env(safe-area-inset-top));left:130px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:0;cursor:pointer;font:inherit;font-size:.68rem;color:var(--ink)}
+#archive.show{opacity:1;visibility:visible;pointer-events:auto}
 #prompt{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 24px);left:0;right:0;text-align:center;z-index:9;font-size:clamp(.95rem,1.6vw,1.15rem);opacity:0;transition:opacity .4s;pointer-events:none}
 #prompt.on{opacity:.85;animation:pulse 2.4s ease-in-out infinite}
 body{cursor:pointer}
@@ -289,11 +295,19 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 #sdlg ul{list-style:none;padding:0;margin:.5rem 0 0}
 #sdlg li{border-top:1px dashed #5a3a24;padding:.5rem 0;font-size:.85rem;white-space:pre-wrap}
 #sdlg li small{display:block;opacity:.7}
+#sdlg .archive-item{width:100%;text-align:left;background:transparent;border:0;border-radius:6px;padding:.45rem 0;color:inherit;cursor:pointer}
+#sdlg .archive-item:hover,#sdlg .archive-item:focus-visible{background:rgba(194,138,26,.14);outline:2px solid #c28a1a}
+#sdlg .archive-item strong,#sdlg .archive-item span{display:block}
+#sdlg .archive-item span{opacity:.75;font-size:.8rem;margin-top:.2rem}
+#sdletter{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;border-top:1px dashed #5a3a24;padding-top:.8rem}
+#sdlg button:disabled{opacity:.5;cursor:wait}
+#sdhome[hidden],#sdbk[hidden],#sdletter[hidden],#sdl[hidden],#sdgo[hidden],#sdar[hidden],#sde[hidden]{display:none}
 </style>
 </head>
 <body class="pre">
 <button id="home" aria-label="Home: back to the start"><svg viewBox="0 0 40 28" aria-hidden="true"><rect x="1.5" y="1.5" width="37" height="25" rx="3" fill="#1f4a5a" stroke="#3a2a1c" stroke-width="2.5"/><path d="M2 3l18 13L38 3" fill="none" stroke="#3a2a1c" stroke-width="2"/><circle cx="20" cy="16" r="4" fill="#c28a1a" stroke="#3a2a1c" stroke-width="1.5"/></svg><span>Home</span></button>
 <button id="newl" aria-label="Write a new letter"><svg viewBox="0 0 40 28" aria-hidden="true"><rect x="4" y="2" width="26" height="24" rx="2" fill="#fbf1d9" stroke="#3a2a1c" stroke-width="2.5"/><path d="M9 9h16M9 14h16M9 19h9" stroke="#3a2a1c" stroke-width="2"/><circle cx="31" cy="20" r="8" fill="#c28a1a" stroke="#3a2a1c" stroke-width="2"/><path d="M31 16v8M27 20h8" stroke="#3a2a1c" stroke-width="2.5" stroke-linecap="round"/></svg><span id="newt">New letter</span></button>
+<button id="archive" type="button" aria-label="Open your saved letters"><svg viewBox="0 0 40 32" aria-hidden="true"><path d="M11 14V9a9 9 0 0 1 18 0v5" fill="none" stroke="#3a2a1c" stroke-width="4" stroke-linecap="round"/><rect x="5" y="13" width="30" height="18" rx="3" fill="#c28a1a" stroke="#3a2a1c" stroke-width="2.5"/><circle cx="20" cy="21" r="2.5" fill="#3a2a1c"/><path d="M20 23v3" stroke="#3a2a1c" stroke-width="2" stroke-linecap="round"/></svg><span>Archive</span></button>
 <p id="prompt" aria-live="polite"></p>
 <button id="mute" aria-label="Toggle sound" title="Sound on/off">♪</button>
 <div id="sbar" aria-hidden="true"><i id="sthumb"></i></div><div id="scrl" aria-label="Scroll the page"><button id="sup" type="button" aria-label="Scroll up to read earlier lines" title="Earlier lines"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="sdn" type="button" aria-label="Scroll down to the line you are writing" title="Back down"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
@@ -348,8 +362,8 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 <h3 id="sdt">Keep this letter</h3><p id="sdp"></p>
 <input id="sde" type="email" placeholder="Your email" autocomplete="email">
 <input id="sdf" type="email" placeholder="Friend's email (optional)" autocomplete="off" style="display:none">
-<div class="row"><button id="sdgo" type="button">Save</button><button id="sdar" class="alt" type="button">My archive</button><button id="sdx" class="alt" type="button">Close</button></div>
-<p class="msg" id="sdm" aria-live="polite"></p><ul id="sdl"></ul></div></div>
+<div class="row"><button id="sdgo" type="button">Save</button><button id="sdar" class="alt" type="button">My archive</button><button id="sdhome" class="alt" type="button" hidden>Back to start</button><button id="sdx" class="alt" type="button">Close</button></div>
+<p class="msg" id="sdm" aria-live="polite"></p><button id="sdbk" class="alt" type="button" hidden>Back to archive</button><ul id="sdl"></ul><pre id="sdletter" hidden></pre></div></div>
 <section id="writer" aria-label="Typewriter"><div class="tw" id="tw"><div class="pclip" id="pclip"><div class="pg" id="pg"></div><i class="caret" id="caret"></i><textarea id="ink" aria-label="Write here" spellcheck="true"></textarea></div><svg id="tsvg" viewBox="0 0 700 720" aria-hidden="true"></svg></div></section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>const _st=window.setTimeout;let TM=[];window.setTimeout=function(){const id=_st.apply(window,arguments);TM.push(id);return id};
@@ -461,7 +475,7 @@ function setPrompt(t){pr.classList.remove('on');setTimeout(()=>{pr.textContent=t
   let i=0;
   function type(){
     if(i<chars.length){chars[i].classList.add('on');chars[i].after(cur);if(i===chars.length-1||text[i+1]===' ')sound('clack');i++;setTimeout(type,55+Math.random()*60)}
-    else setTimeout(()=>{cur.remove();$('title').classList.add('gone');$('home').classList.add('show');$('newl').classList.add('show');state='wait';setTimeout(throwPhotos,500);setTimeout(disperse,4300)},500)
+    else setTimeout(()=>{cur.remove();$('title').classList.add('gone');$('home').classList.add('show');$('newl').classList.add('show');$('archive').classList.add('show');state='wait';setTimeout(throwPhotos,500);setTimeout(disperse,4300)},500)
   }
   Promise.race([document.fonts?document.fonts.ready:Promise.resolve(),new Promise(r=>setTimeout(r,1500))]).then(()=>{const go=()=>setTimeout(type,300);try{ac()}catch(_){}
     if(ctx&&ctx.state==='running')return go();
@@ -469,15 +483,16 @@ function setPrompt(t){pr.classList.remove('on');setTimeout(()=>{pr.textContent=t
     const u=()=>{removeEventListener('pointerdown',u,true);removeEventListener('keydown',u,true);try{ac()}catch(_){}setPrompt('');go()};
     addEventListener('pointerdown',u,true);addEventListener('keydown',u,true)});
 })();
-const LOCKS=["images/lock-1.jpg","images/lock-2.jpg","images/lock-3.jpg","images/lock-4.jpg","images/lock-5.jpg","images/lock-6.jpg","images/lock-7.jpg","images/lock-8.jpg"];
-const POS=['50% 50%','30% 25%','65% 55%','50% 80%','40% 40%','50% 65%','50% 50%','72% 55%'];
+const LOCKS=["images/lock-1.jpg","images/lock-2.jpg","images/lock-3.jpg","images/lock-4.jpg","images/lock-5.jpg","images/lock-6.jpg","images/lock-7.jpg","images/lock-8.jpg","images/lock-9.jpg","images/lock-10.jpg","images/lock-11.jpg"];
+const POS=['50% 50%','30% 25%','65% 55%','50% 80%','40% 40%','50% 65%','50% 50%','72% 55%','50% 46%','58% 50%','50% 70%'];
 function throwPhotos(){
   if(wall.childElementCount)return;
-  const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?3:6,rows=mob?5:4,cw=W/cols,rh=H/rows;
+  const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?2:4,rows=Math.ceil(LOCKS.length/cols),cw=W/cols,rh=H/rows;
   let q=5;const R=()=>{q=(q*16807)%2147483647;return(q-1)/2147483646};
-  let n=0;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const i=n%LOCKS.length,ar=[.75,.75,1,.62][Math.floor(R()*4)],w=Math.min(230,cw*1.15)*(.85+R()*.25);
+  const order=LOCKS.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+  for(let n=0;n<LOCKS.length;n++){
+    const r=Math.floor(n/cols),c=n%cols,i=order[n],ar=[.75,.75,1,.62][Math.floor(R()*4)],w=Math.min(230,cw*1.15)*(.85+R()*.25);
     const x=Math.min(W-w*.4,Math.max(w*.4,(c+.5)*cw+(R()-.5)*cw*.5)),y=(r+.5)*rh+(R()-.5)*rh*.5;
     let dx=x-W/2,dy=y-H/2;const L=Math.hypot(dx,dy)||1,far=Math.max(W,H)*1.1;
     const el=document.createElement('div');el.className='pic';const st=el.style;
@@ -485,9 +500,9 @@ function throwPhotos(){
     st.setProperty('--r',((R()-.5)*18).toFixed(1)+'deg');st.setProperty('--r0',((R()-.5)*120).toFixed(0)+'deg');st.setProperty('--tr',((R()-.5)*14).toFixed(1)+'deg');
     st.setProperty('--sx',(dx/L*far).toFixed(0)+'px');st.setProperty('--sy',(dy/L*far).toFixed(0)+'px');
     st.setProperty('--d',(R()*.9).toFixed(2)+'s');st.setProperty('--d2',(R()*.3).toFixed(2)+'s');st.zIndex=Math.floor(R()*10);
-    const p=POS[Math.floor(R()*POS.length)],z=(1+R()*.5).toFixed(2);
+    const p=POS[i],z=(1+R()*.5).toFixed(2);
     el.innerHTML=(R()<.5?'<i class="tp"></i>':'')+'<div class="im"><img alt="" src="'+LOCKS[i]+'" style="object-position:'+p+';transform:scale('+z+');transform-origin:'+p+'"></div>';
-    wall.appendChild(el);n++;
+    wall.appendChild(el);
   }
   void wall.offsetWidth;wall.classList.add('in');sound('swish');
 }
@@ -510,7 +525,7 @@ function goChoose(){
   setPrompt('Choose one: for you, or for a friend');
 }
 function advance(){if(state==='front')flip();else if(state==='back')open()}
-document.addEventListener('click',e=>{if(e.target.closest('#mute,#home,#newl,#scrl,#savel,#sdlg'))return;advance()});
+document.addEventListener('click',e=>{if(e.target.closest('#mute,#home,#newl,#archive,#scrl,#savel,#sdlg'))return;advance()});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,textarea')){e.preventDefault();advance()}});
 $('home').onclick=e=>{e.stopPropagation();location.reload()};
 
@@ -733,27 +748,85 @@ const $=id=>document.getElementById(id),dlg=$('sdlg'),msg=m=>$('sdm').textConten
 const ready=!/YOUR-/.test(SUPABASE_URL)&&!/YOUR-/.test(SUPABASE_ANON_KEY)&&!!window.supabase;
 const sb=ready?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const sl=$('savel');
+let mode='save',authFlowStarted=false,retryDraft=null;
 setInterval(()=>sl.classList.toggle('show',!!TW.text.trim()),200);
-const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-function open(){dlg.classList.add('on');msg('');$('sdl').innerHTML='';
+function resetModal(){
+  $('sdl').replaceChildren();$('sdletter').hidden=true;$('sdbk').hidden=true;
+  $('sdhome').hidden=true;$('sdgo').hidden=false;$('sdar').hidden=false;
+  $('sde').hidden=false;$('sdf').hidden=false;
+}
+function open(){mode='save';dlg.classList.add('on');resetModal();msg('');
   const fr=TW.who==='friend';$('sdf').style.display=fr?'block':'none';
+  $('sdf').hidden=!fr;$('sdl').hidden=true;
+  $('sdt').textContent='Keep this letter';$('sdgo').textContent='Save';
   $('sdgo').disabled=!ready;$('sdar').disabled=!ready;
   $('sdp').textContent=!ready?'Saving is not connected yet. The site owner needs to add the Supabase details.':'We keep a copy in your private archive and email one to you'+(fr?' and your friend.':'.');
   $('sde').readOnly=false;
   sb&&sb.auth.getSession().then(({data:{session},error})=>{
     if(error){msg('Could not check your sign-in status: '+error.message);return}
     if(session){$('sde').value=session.user.email||'';$('sde').readOnly=true}
-  })}
+  }).catch(e=>msg('Could not check your sign-in status: '+e.message))}
 function close(){dlg.classList.remove('on');try{$('ink').focus({preventScroll:true})}catch(_){}}
 sl.addEventListener('click',e=>{e.stopPropagation();if(!TW.text.trim())return;open();setTimeout(()=>{try{$('sde').focus()}catch(_){}},60)});
 $('sdx').addEventListener('click',close);
+async function showArchive(){
+  mode='archive';dlg.classList.add('on');resetModal();$('sdf').hidden=true;$('sde').hidden=true;$('sdl').hidden=false;
+  $('sdt').textContent='Your archive';$('sdp').textContent='Your saved letters are private to your account.';
+  $('sdar').hidden=true;$('sdgo').hidden=true;$('sde').hidden=true;
+  msg('Loading your saved letters...');
+  const {data,error}=await sb.from('letters').select('id,kind,body,created_at').order('created_at',{ascending:false});
+  if(error)throw error;
+  $('sdl').replaceChildren();
+  if(!data.length){msg('No saved letters yet.');return}
+  msg('');
+  data.forEach(letter=>{
+    const li=document.createElement('li'),button=document.createElement('button');
+    const heading=document.createElement('strong'),preview=document.createElement('span');
+    button.type='button';button.className='archive-item';
+    heading.textContent=new Date(letter.created_at).toLocaleString()+' · '+(letter.kind==='friend'?'for a friend':'for me');
+    preview.textContent=letter.body.slice(0,120)+(letter.body.length>120?'…':'');
+    button.append(heading,preview);button.addEventListener('click',()=>{
+      $('sdletter').textContent=letter.body;$('sdletter').hidden=false;
+      $('sdbk').hidden=false;$('sdl').hidden=true;$('sdp').textContent=heading.textContent;
+      msg('');
+    });
+    li.append(button);$('sdl').append(li);
+  });
+}
+async function openArchive(){
+  if(!ready){dlg.classList.add('on');resetModal();$('sdt').textContent='Your archive';$('sdgo').disabled=true;msg('Saving is not connected yet.');return}
+  mode='archive';dlg.classList.add('on');resetModal();$('sdf').hidden=true;
+  $('sdt').textContent='Your archive';$('sdp').textContent='Enter your email to view your saved letters.';
+  $('sdgo').textContent='Send sign-in link';$('sdar').hidden=true;$('sdgo').disabled=false;
+  $('sdl').hidden=true;$('sde').readOnly=false;msg('');
+  const {data:{session},error}=await sb.auth.getSession();
+  if(error){msg('Could not check your sign-in status: '+error.message);return}
+  if(session){$('sde').value=session.user.email||'';$('sde').hidden=true;$('sdgo').hidden=true;await showArchive()}
+}
+document.getElementById('archive').addEventListener('click',e=>{e.stopPropagation();openArchive().catch(err=>msg('Could not load your archive: '+err.message))});
+$('sdbk').addEventListener('click',()=>showArchive().catch(err=>msg('Could not load your archive: '+err.message)));
+$('sdhome').addEventListener('click',()=>location.reload());
 async function send(d){
   const r=await sb.functions.invoke('send-letter',{body:d});if(r.error)throw r.error;
   if(!r.data||r.data.saved!==true)throw new Error(r.data&&r.data.error||'The letter was not saved.');
   return r.data}
 $('sdgo').addEventListener('click',async()=>{
   if(!ready)return;
-  const d={kind:TW.who,body:TW.text,recipient_email:$('sdf').value.trim()||null};
+  if(mode==='archive'){
+    try{
+      const {data:{session},error:authError}=await sb.auth.getSession();
+      if(authError)throw authError;
+      if(session){await showArchive();return}
+      const em=$('sde').value.trim();if(!em){msg('Enter your email first.');return}
+      if(!$('sde').checkValidity()){$('sde').reportValidity();return}
+      localStorage.setItem('openArchiveAfterSignIn','1');msg('Sending you a sign-in link...');
+      const {error}=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+location.pathname}});
+      if(error){localStorage.removeItem('openArchiveAfterSignIn');throw error}
+      msg('Check your inbox and tap the link. Your archive will open when you return.');
+    }catch(e){msg('Something went wrong: '+(e.message||e))}
+    return;
+  }
+  const d=retryDraft||{kind:TW.who,body:TW.text,recipient_email:$('sdf').value.trim()||null};
   try{
     const {data:{session},error:authError}=await sb.auth.getSession();
     if(authError)throw authError;
@@ -764,28 +837,41 @@ $('sdgo').addEventListener('click',async()=>{
       const {error}=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+location.pathname}});
       if(error){localStorage.removeItem('draftLetter');throw error}
       msg('Check your inbox and tap the link. Your letter will be saved when you return.');return}
-    msg('Saving...');const o=await send(d);
-    msg(o.emailed?'Saved to your archive and emailed.':'Saved to your archive. The email could not be sent.')
-  }catch(e){msg('Something went wrong: '+(e.message||e))}});
-$('sdar').addEventListener('click',async()=>{
-  if(!ready)return;const {data:{session},error:sessionError}=await sb.auth.getSession();
-  if(sessionError){msg('Could not check your sign-in status: '+sessionError.message);return}
-  if(!session){msg('Sign in first (enter your email and press Save).');return}
-  const {data,error}=await sb.from('letters').select('*').order('created_at',{ascending:false});
-  if(error){msg(error.message);return}
-  msg(data.length?'':'No saved letters yet.');
-  $('sdl').innerHTML=data.map(l=>'<li><small>'+new Date(l.created_at).toLocaleString()+' · '+(l.kind==='friend'?'for a friend':'for me')+'</small>'+esc(l.body)+'</li>').join('')});
+    $('sdgo').disabled=true;msg('Saving...');const o=await send(d);retryDraft=null;
+    msg(o.emailed?'Saved to your archive and emailed.':'Saved to your archive. The email could not be sent.');
+    $('sdhome').hidden=false;
+  }catch(e){$('sdgo').disabled=false;msg('Something went wrong: '+(e.message||e))}});
+$('sdar').addEventListener('click',()=>openArchive().catch(e=>msg('Could not load your archive: '+e.message)));
 // Save the waiting draft after the auth callback releases Supabase's session lock.
 if(sb)sb.auth.onAuthStateChange((ev,ses)=>{
-  if((ev!=='SIGNED_IN'&&ev!=='INITIAL_SESSION')||!ses)return;
-  let d;try{d=JSON.parse(localStorage.getItem('draftLetter')||'null')}catch(_){msg('Could not read your saved draft from this browser.');return}
-  if(!d)return;
-  dlg.classList.add('on');$('sdt').textContent='Welcome back';msg('Saving your letter...');
+  if((ev!=='SIGNED_IN'&&ev!=='INITIAL_SESSION')||!ses||authFlowStarted)return;
+  let d,archiveRequested;
+  try{
+    d=JSON.parse(localStorage.getItem('draftLetter')||'null');
+    archiveRequested=localStorage.getItem('openArchiveAfterSignIn')==='1';
+  }catch(_){msg('Could not read your saved sign-in request from this browser.');return}
+  if(!d&&!archiveRequested)return;
+  authFlowStarted=true;
+  if(archiveRequested)localStorage.removeItem('openArchiveAfterSignIn');
+  if(d)localStorage.removeItem('draftLetter');
+  mode='save';dlg.classList.add('on');resetModal();$('sdf').hidden=true;
+  $('sdt').textContent='Welcome back';$('sdp').textContent='';msg(d?'Saving your letter...':'Opening your archive...');
   setTimeout(async()=>{
-    try{
-      const o=await send(d);localStorage.removeItem('draftLetter');
-      msg(o.emailed?'Your letter is saved to your archive and emailed.':'Your letter is saved to your archive. The email could not be sent.')
-    }catch(e){msg('Could not save your letter: '+(e.message||e)+'. Your draft is still saved in this browser; press Save to try again.')}
+    if(d){
+      try{
+        const o=await send(d);retryDraft=null;
+        msg(o.emailed?'Your letter is saved to your archive and emailed.':'Your letter is saved to your archive. The email could not be sent.');
+        $('sdhome').hidden=false;
+      }catch(e){
+        retryDraft=d;
+        try{localStorage.setItem('draftLetter',JSON.stringify(d))}catch(_){}
+        msg('Could not save your letter: '+(e.message||e)+'. Your draft is still saved in this browser; press Save to try again.');
+        $('sdgo').hidden=false;$('sdgo').textContent='Save';$('sdar').hidden=false;
+      }
+    }
+    if(archiveRequested){
+      try{await showArchive()}catch(e){msg('Could not load your archive: '+e.message)}
+    }
   },0)
 });
 })();
