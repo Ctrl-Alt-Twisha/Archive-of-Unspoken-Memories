@@ -150,7 +150,7 @@ body.pre .envelope{opacity:0}
 #title p{font-style:italic;color:#9a6b12;margin-top:.35em;font-size:clamp(.9rem,2.4vw,1.25rem)}
 #title.gone{opacity:0;transform:translateY(-14px)}
 @media (max-height:620px){#title p{display:none}#title h2{font-size:clamp(1.2rem,4vw,1.8rem)}}
-#home,#newl,#archive{width:52px;height:54px;padding:2px 0;justify-content:center;text-align:center;line-height:1.05;font-size:.68rem}
+#home,#newl,#archive{width:52px;height:58px;padding:2px 0;justify-content:center;text-align:center;line-height:1.05;font-size:.68rem}
 #home{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(12px,env(safe-area-inset-top));left:10px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:0;cursor:pointer;font:inherit;font-size:.68rem;color:var(--ink)}
 #newl{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s;position:fixed;top:max(12px,env(safe-area-inset-top));left:70px;z-index:9;display:flex;flex-direction:column;align-items:center;gap:0;background:none;border:0;cursor:pointer;font:inherit;font-size:.68rem;color:var(--ink)}
 body.letter #newl,body.writing #newl{color:#fbf1d9}
@@ -158,7 +158,7 @@ body.letter #archive,body.writing #archive{color:#fbf1d9}
 body.writing #home,body.writing #newl,body.writing #archive{background:rgba(20,12,6,.6);border-radius:10px;padding:4px 7px}
 #newl.show{opacity:1;visibility:visible;pointer-events:auto}
 #newl svg{width:38px;height:28px}
-#archive svg{width:38px;height:28px}
+#archive svg{width:38px;height:34px;overflow:visible}
 #newl:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 #archive:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 #home.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -302,12 +302,30 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 #sdletter{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;border-top:1px dashed #5a3a24;padding-top:.8rem}
 #sdlg button:disabled{opacity:.5;cursor:wait}
 #sdhome[hidden],#sdbk[hidden],#sdletter[hidden],#sdl[hidden],#sdgo[hidden],#sdar[hidden],#sde[hidden]{display:none}
+
+/* archive titles: one line each, ending in ... */
+#sdlg .archive-item{padding:.55rem .4rem}
+#sdlg .archive-item strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400;font-size:1.02rem}
+#sdlg .archive-item span{white-space:nowrap}
+#sdlg li{white-space:normal}
+/* full-page letter reader */
+#reader{position:fixed;inset:0;z-index:60;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background-color:#8a5f2a;background-image:radial-gradient(ellipse at 50% 40%,#c9954a 0%,#a8742f 45%,#5e3a14 100%),repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 2px,transparent 2px 7px)}
+#reader.on{display:block;animation:rdin .45s ease both}
+@keyframes rdin{from{opacity:0}to{opacity:1}}
+.rdwrap{max-width:760px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
+#rdback{font:inherit;font-family:'Special Elite',monospace;font-size:.95rem;color:#fbf1d9;background:rgba(20,12,6,.6);border:0;border-radius:10px;padding:.55rem .9rem;cursor:pointer;margin-bottom:16px}
+#rdback:focus-visible{outline:3px solid #fbe9bd;outline-offset:3px}
+#rdsheet{background:linear-gradient(#f4e9cc,#ecdfba);color:#2b1d12;font-family:'Special Elite','Courier Prime',monospace;
+  padding:clamp(1.4rem,5vw,3rem) clamp(1.2rem,6vw,3.2rem) clamp(2rem,6vw,3.4rem);box-shadow:0 18px 40px rgba(30,15,5,.5),0 0 0 1px rgba(58,42,28,.25);min-height:60vh}
+#rdmeta{font-size:.82rem;color:#7a6246;border-bottom:1px dashed rgba(58,42,28,.45);padding-bottom:.8rem;margin-bottom:1.4rem}
+#rdtext{white-space:pre-wrap;overflow-wrap:anywhere;font-size:clamp(1rem,3.6vw,1.2rem);line-height:1.8;letter-spacing:.01em;max-width:62ch}
 </style>
 </head>
 <body class="pre">
 <button id="home" aria-label="Home: back to the start"><svg viewBox="0 0 40 28" aria-hidden="true"><rect x="1.5" y="1.5" width="37" height="25" rx="3" fill="#1f4a5a" stroke="#3a2a1c" stroke-width="2.5"/><path d="M2 3l18 13L38 3" fill="none" stroke="#3a2a1c" stroke-width="2"/><circle cx="20" cy="16" r="4" fill="#c28a1a" stroke="#3a2a1c" stroke-width="1.5"/></svg><span>Home</span></button>
 <button id="newl" aria-label="Write a new letter"><svg viewBox="0 0 40 28" aria-hidden="true"><rect x="4" y="2" width="26" height="24" rx="2" fill="#fbf1d9" stroke="#3a2a1c" stroke-width="2.5"/><path d="M9 9h16M9 14h16M9 19h9" stroke="#3a2a1c" stroke-width="2"/><circle cx="31" cy="20" r="8" fill="#c28a1a" stroke="#3a2a1c" stroke-width="2"/><path d="M31 16v8M27 20h8" stroke="#3a2a1c" stroke-width="2.5" stroke-linecap="round"/></svg><span id="newt">New letter</span></button>
-<button id="archive" type="button" aria-label="Open your saved letters"><svg viewBox="0 0 40 32" aria-hidden="true"><path d="M11 14V9a9 9 0 0 1 18 0v5" fill="none" stroke="#3a2a1c" stroke-width="4" stroke-linecap="round"/><rect x="5" y="13" width="30" height="18" rx="3" fill="#c28a1a" stroke="#3a2a1c" stroke-width="2.5"/><circle cx="20" cy="21" r="2.5" fill="#3a2a1c"/><path d="M20 23v3" stroke="#3a2a1c" stroke-width="2" stroke-linecap="round"/></svg><span>Archive</span></button>
+<button id="archive" type="button" aria-label="Open your saved letters"><svg viewBox="0 0 40 36" aria-hidden="true"><path d="M12 16V11a8 8 0 0 1 16 0v5" fill="none" stroke="#3a2a1c" stroke-width="3.5" stroke-linecap="round"/><rect x="6" y="15" width="28" height="19" rx="3" fill="#c28a1a" stroke="#3a2a1c" stroke-width="2.5"/><circle cx="20" cy="23" r="2.6" fill="#3a2a1c"/><path d="M20 24.5v4" stroke="#3a2a1c" stroke-width="2.2" stroke-linecap="round"/></svg><span>Archive</span></button>
 <p id="prompt" aria-live="polite"></p>
 <button id="mute" aria-label="Toggle sound" title="Sound on/off">♪</button>
 <div id="sbar" aria-hidden="true"><i id="sthumb"></i></div><div id="scrl" aria-label="Scroll the page"><button id="sup" type="button" aria-label="Scroll up to read earlier lines" title="Earlier lines"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="sdn" type="button" aria-label="Scroll down to the line you are writing" title="Back down"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
@@ -364,6 +382,7 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 <input id="sdf" type="email" placeholder="Friend's email (optional)" autocomplete="off" style="display:none">
 <div class="row"><button id="sdgo" type="button">Save</button><button id="sdar" class="alt" type="button">My archive</button><button id="sdhome" class="alt" type="button" hidden>Back to start</button><button id="sdx" class="alt" type="button">Close</button></div>
 <p class="msg" id="sdm" aria-live="polite"></p><button id="sdbk" class="alt" type="button" hidden>Back to archive</button><ul id="sdl"></ul><pre id="sdletter" hidden></pre></div></div>
+<div id="reader" role="dialog" aria-modal="true" aria-label="Your letter"><div class="rdwrap"><button id="rdback" type="button">&larr; Back to archive</button><article id="rdsheet"><p id="rdmeta"></p><div id="rdtext"></div></article></div></div>
 <section id="writer" aria-label="Typewriter"><div class="tw" id="tw"><div class="pclip" id="pclip"><div class="pg" id="pg"></div><i class="caret" id="caret"></i><textarea id="ink" aria-label="Write here" spellcheck="true"></textarea></div><svg id="tsvg" viewBox="0 0 700 720" aria-hidden="true"></svg></div></section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>const _st=window.setTimeout;let TM=[];window.setTimeout=function(){const id=_st.apply(window,arguments);TM.push(id);return id};
@@ -475,7 +494,7 @@ function setPrompt(t){pr.classList.remove('on');setTimeout(()=>{pr.textContent=t
   let i=0;
   function type(){
     if(i<chars.length){chars[i].classList.add('on');chars[i].after(cur);if(i===chars.length-1||text[i+1]===' ')sound('clack');i++;setTimeout(type,55+Math.random()*60)}
-    else setTimeout(()=>{cur.remove();$('title').classList.add('gone');$('home').classList.add('show');$('newl').classList.add('show');$('archive').classList.add('show');state='wait';setTimeout(throwPhotos,500);setTimeout(disperse,4300)},500)
+    else setTimeout(()=>{cur.remove();$('title').classList.add('gone');$('home').classList.add('show');$('newl').classList.add('show');$('archive').classList.add('show');state='wait';setTimeout(throwPhotos,500);setTimeout(disperse,5000)},500)
   }
   Promise.race([document.fonts?document.fonts.ready:Promise.resolve(),new Promise(r=>setTimeout(r,1500))]).then(()=>{const go=()=>setTimeout(type,300);try{ac()}catch(_){}
     if(ctx&&ctx.state==='running')return go();
@@ -487,12 +506,12 @@ const LOCKS=["images/lock-1.jpg","images/lock-2.jpg","images/lock-3.jpg","images
 const POS=['50% 50%','30% 25%','65% 55%','50% 80%','40% 40%','50% 65%','50% 50%','72% 55%','50% 46%','58% 50%','50% 70%'];
 function throwPhotos(){
   if(wall.childElementCount)return;
-  const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?3:6,rows=mob?5:4,cw=W/cols,rh=H/rows;
+  const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?4:7,rows=mob?7:4,cw=W/cols,rh=H/rows;
   let q=5;const R=()=>{q=(q*16807)%2147483647;return(q-1)/2147483646};
   const order=LOCKS.map((_,i)=>i);
   for(let i=order.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
   for(let n=0;n<cols*rows;n++){
-    const r=Math.floor(n/cols),c=n%cols,i=order[n%order.length],ar=[.75,.75,1,.62][Math.floor(R()*4)],w=Math.min(230,cw*1.15)*(.85+R()*.25);
+    const r=Math.floor(n/cols),c=n%cols,i=order[n%order.length],ar=[.75,.75,1,.62][Math.floor(R()*4)],w=Math.min(250,cw*1.5)*(.85+R()*.25);
     const x=Math.min(W-w*.4,Math.max(w*.4,(c+.5)*cw+(R()-.5)*cw*.5)),y=(r+.5)*rh+(R()-.5)*rh*.5;
     let dx=x-W/2,dy=y-H/2;const L=Math.hypot(dx,dy)||1,far=Math.max(W,H)*1.1;
     const el=document.createElement('div');el.className='pic';const st=el.style;
@@ -525,8 +544,8 @@ function goChoose(){
   setPrompt('Choose one: for you, or for a friend');
 }
 function advance(){if(state==='front')flip();else if(state==='back')open()}
-document.addEventListener('click',e=>{if(e.target.closest('#mute,#home,#newl,#archive,#scrl,#savel,#sdlg'))return;advance()});
-document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,textarea')){e.preventDefault();advance()}});
+document.addEventListener('click',e=>{if(e.target.closest('#mute,#home,#newl,#archive,#scrl,#savel,#sdlg,#reader'))return;advance()});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,textarea,#reader')){e.preventDefault();advance()}});
 $('home').onclick=e=>{e.stopPropagation();location.reload()};
 
 // 2. open on click / key
@@ -729,7 +748,7 @@ tbar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!b.d
 
 // type anywhere on the typewriter page: send the keystroke to the paper
 document.addEventListener('keydown',e=>{
-  if(state!=='writing'||e.ctrlKey||e.metaKey||e.altKey||$('sdlg').classList.contains('on'))return;
+  if(state!=='writing'||e.ctrlKey||e.metaKey||e.altKey||$('sdlg').classList.contains('on')||$('reader').classList.contains('on'))return;
   const ink=$('ink');if(!ink||document.activeElement===ink)return;
   const onBtn=!!(e.target.closest&&e.target.closest('button,a,input,select'));
   const typing=e.key.length===1&&e.key!==' '||e.key==='Backspace';
@@ -783,16 +802,34 @@ async function showArchive(){
     const li=document.createElement('li'),button=document.createElement('button');
     const heading=document.createElement('strong'),preview=document.createElement('span');
     button.type='button';button.className='archive-item';
-    heading.textContent=new Date(letter.created_at).toLocaleString()+' · '+(letter.kind==='friend'?'for a friend':'for me');
-    preview.textContent=letter.body.slice(0,120)+(letter.body.length>120?'…':'');
-    button.append(heading,preview);button.addEventListener('click',()=>{
-      $('sdletter').textContent=letter.body;$('sdletter').hidden=false;
-      $('sdbk').hidden=false;$('sdl').hidden=true;$('sdp').textContent=heading.textContent;
-      msg('');
-    });
+    const first=(letter.body.split('\n').find(l=>l.trim())||'').trim(),ttl=first.length>34?first.slice(0,34).trimEnd()+'…':first;
+    heading.textContent=ttl||'Untitled letter';
+    preview.textContent=new Date(letter.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' · '+(letter.kind==='friend'?'for a friend':'for me');
+    button.append(heading,preview);button.addEventListener('click',()=>openReader(letter));
     li.append(button);$('sdl').append(li);
   });
 }
+
+// ----- full-page letter reader (brown desk, paper sheet, typewriter font) -----
+const rd=$('reader'),rdSheet=$('rdsheet'),rdBack=$('rdback');
+function openReader(letter){
+  dlg.classList.remove('on');
+  $('rdmeta').textContent=new Date(letter.created_at).toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+(letter.kind==='friend'?'a letter for a friend':'a letter for me');
+  $('rdtext').textContent=letter.body;
+  rd.classList.add('on');rd.scrollTop=0;rdSheet.scrollTop=0;
+  history.pushState({reader:1},'');
+  setTimeout(()=>{try{rdBack.focus({preventScroll:true})}catch(_){}} ,50);
+}
+function closeReader(fromPop){
+  if(!rd.classList.contains('on'))return;
+  rd.classList.remove('on');
+  if(!fromPop&&history.state&&history.state.reader)history.back();
+  showArchive().catch(err=>{dlg.classList.add('on');msg('Could not load your archive: '+err.message)});
+}
+rdBack.addEventListener('click',e=>{e.stopPropagation();closeReader(false)});
+rd.addEventListener('click',e=>e.stopPropagation());
+addEventListener('popstate',()=>closeReader(true));
+addEventListener('keydown',e=>{if(e.key==='Escape')closeReader(false)});
 async function openArchive(){
   if(!ready){dlg.classList.add('on');resetModal();$('sdt').textContent='Your archive';$('sdgo').disabled=true;msg('Saving is not connected yet.');return}
   mode='archive';dlg.classList.add('on');resetModal();$('sdf').hidden=true;
@@ -807,7 +844,8 @@ document.getElementById('archive').addEventListener('click',e=>{e.stopPropagatio
 $('sdbk').addEventListener('click',()=>showArchive().catch(err=>msg('Could not load your archive: '+err.message)));
 $('sdhome').addEventListener('click',()=>location.reload());
 async function send(d){
-  const r=await sb.functions.invoke('send-letter',{body:d});if(r.error)throw r.error;
+  const r=await sb.functions.invoke('send-letter',{body:d});
+  if(r.error){let m=r.error.message;try{const j=await r.error.context.json();if(j&&j.error)m=j.error}catch(_){}throw new Error(m)}
   if(!r.data||r.data.saved!==true)throw new Error(r.data&&r.data.error||'The letter was not saved.');
   return r.data}
 $('sdgo').addEventListener('click',async()=>{
