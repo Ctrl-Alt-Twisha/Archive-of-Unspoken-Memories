@@ -388,7 +388,10 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 <script>const _st=window.setTimeout;let TM=[];window.setTimeout=function(){const id=_st.apply(window,arguments);TM.push(id);return id};
 const $=id=>document.getElementById(id);
 const flipper=$('flipper'),env=$('envelope'),back=$('back'),paper=$('paper'),mute=$('mute'),wall=$('wall');
+const MUTE_STORAGE_KEY='archiveOfUnspokenMemoriesMuted';
 let muted=false,ctx=null,opened=false;
+try{muted=localStorage.getItem(MUTE_STORAGE_KEY)==='true'}catch(e){}
+mute.classList.toggle('off',muted);mute.setAttribute('aria-pressed',String(muted));
 
 function tearSound(){
   if(muted)return;
@@ -470,7 +473,8 @@ function sound(kind){
     swishSound();
   }catch(e){}
 }
-mute.onclick=e=>{e.stopPropagation();muted=!muted;mute.classList.toggle('off',muted);mute.setAttribute('aria-pressed',muted)};
+mute.onclick=e=>{e.stopPropagation();muted=!muted;mute.classList.toggle('off',muted);mute.setAttribute('aria-pressed',String(muted));
+  try{localStorage.setItem(MUTE_STORAGE_KEY,String(muted))}catch(e){}};
 
 // 1. logo shows, then flips
 let state='pre';
