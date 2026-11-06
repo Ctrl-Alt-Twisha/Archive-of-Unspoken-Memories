@@ -768,6 +768,11 @@ const ready=!/YOUR-/.test(SUPABASE_URL)&&!/YOUR-/.test(SUPABASE_ANON_KEY)&&!!win
 const sb=ready?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const sl=$('savel');
 let mode='save',authFlowStarted=false,retryDraft=null;
+function explainError(e){
+  const text=e&&e.message?e.message:String(e);
+  if(/rate limit/i.test(text))return 'Supabase is temporarily limiting sign-in emails. Your letter is still saved in this browser, but has not been added to your archive yet. Wait before requesting another link, or ask the site owner to configure custom SMTP in Supabase.';
+  return text;
+}
 setInterval(()=>sl.classList.toggle('show',!!TW.text.trim()),200);
 function resetModal(){
   $('sdl').replaceChildren();$('sdletter').hidden=true;$('sdbk').hidden=true;
@@ -861,7 +866,7 @@ $('sdgo').addEventListener('click',async()=>{
       const {error}=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+location.pathname}});
       if(error){localStorage.removeItem('openArchiveAfterSignIn');throw error}
       msg('Check your inbox and tap the link. Your archive will open when you return.');
-    }catch(e){msg('Something went wrong: '+(e.message||e))}
+    }catch(e){msg('Something went wrong: '+explainError(e))}
     return;
   }
   const d=retryDraft||{kind:TW.who,body:TW.text,recipient_email:$('sdf').value.trim()||null};
@@ -873,12 +878,12 @@ $('sdgo').addEventListener('click',async()=>{
       try{localStorage.setItem('draftLetter',JSON.stringify(d))}catch(_){msg('This browser could not keep your draft for sign-in. Please allow site storage and try again.');return}
       msg('Sending you a sign-in link...');
       const {error}=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+location.pathname}});
-      if(error){localStorage.removeItem('draftLetter');throw error}
+      if(error)throw error;
       msg('Check your inbox and tap the link. Your letter will be saved when you return.');return}
     $('sdgo').disabled=true;msg('Saving...');const o=await send(d);retryDraft=null;
     msg(o.emailed?'Saved to your archive and emailed.':'Saved to your archive. The email could not be sent.');
     $('sdhome').hidden=false;
-  }catch(e){$('sdgo').disabled=false;msg('Something went wrong: '+(e.message||e))}});
+  }catch(e){$('sdgo').disabled=false;msg('Something went wrong: '+explainError(e))}});
 $('sdar').addEventListener('click',()=>openArchive().catch(e=>msg('Could not load your archive: '+e.message)));
 // Save the waiting draft after the auth callback releases Supabase's session lock.
 if(sb)sb.auth.onAuthStateChange((ev,ses)=>{
