@@ -727,34 +727,39 @@ document.addEventListener('click',e=>{
 },true);
 
 // ===== Save letter + email copy (Supabase) =====
-const SUPABASE_URL='https://YOUR-PROJECT.supabase.co',SUPABASE_ANON_KEY='YOUR-ANON-KEY';
+const SUPABASE_URL='https://mhxaquqtxfksjraxhtaa.supabase.co',SUPABASE_ANON_KEY='sb_publishable_huZPrj-b40uuJPRFrOr4Yw_Et0uXzDt';
 (function(){
 const $=id=>document.getElementById(id),dlg=$('sdlg'),msg=m=>$('sdm').textContent=m||'';
-const ready=!/YOUR-/.test(SUPABASE_URL)&&window.supabase;
+const ready=!/YOUR-/.test(SUPABASE_URL)&&!/YOUR-/.test(SUPABASE_ANON_KEY)&&!!window.supabase;
 const sb=ready?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const sl=$('savel');
 setInterval(()=>sl.classList.toggle('show',!!TW.text.trim()),200);
 const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function open(){dlg.classList.add('on');msg('');$('sdl').innerHTML='';
   const fr=TW.who==='friend';$('sdf').style.display=fr?'block':'none';
+  $('sdgo').disabled=!ready;$('sdar').disabled=!ready;
   $('sdp').textContent=!ready?'Saving is not connected yet. The site owner needs to add the Supabase details.':'We keep a copy in your private archive and email one to you'+(fr?' and your friend.':'.');
+  $('sde').readOnly=false;
   sb&&sb.auth.getUser().then(r=>{const u=r.data.user;if(u){$('sde').value=u.email;$('sde').readOnly=true}})}
 function close(){dlg.classList.remove('on');try{$('ink').focus({preventScroll:true})}catch(_){}}
 sl.addEventListener('click',e=>{e.stopPropagation();if(!TW.text.trim())return;open();setTimeout(()=>{try{$('sde').focus()}catch(_){}},60)});
 $('sdx').addEventListener('click',close);
 async function send(d){
-  const r=await sb.functions.invoke('send-letter',{body:d});if(r.error)throw r.error;return r.data}
+  const r=await sb.functions.invoke('send-letter',{body:d});if(r.error)throw r.error;
+  if(!r.data||r.data.saved!==true)throw new Error(r.data&&r.data.error||'The letter was not saved.');
+  return r.data}
 $('sdgo').addEventListener('click',async()=>{
   if(!ready)return;
   const d={kind:TW.who,body:TW.text,recipient_email:$('sdf').value.trim()||null};
   try{
-    const {data:{user}}=await sb.auth.getUser();
+    const {data:{user},error:authError}=await sb.auth.getUser();
+    if(authError)throw authError;
     if(!user){
       const em=$('sde').value.trim();if(!em){msg('Enter your email first.');return}
-      try{sessionStorage.setItem('draftLetter',JSON.stringify(d))}catch(_){}
+      try{localStorage.setItem('draftLetter',JSON.stringify(d))}catch(_){msg('This browser could not keep your draft for sign-in. Please allow site storage and try again.');return}
       msg('Sending you a sign-in link...');
       const {error}=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+location.pathname}});
-      if(error)throw error;
+      if(error){localStorage.removeItem('draftLetter');throw error}
       msg('Check your inbox and tap the link. Your letter will be saved when you return.');return}
     msg('Saving...');const o=await send(d);
     msg(o.emailed?'Saved to your archive and emailed.':'Saved to your archive. The email could not be sent.')
@@ -766,11 +771,19 @@ $('sdar').addEventListener('click',async()=>{
   if(error){msg(error.message);return}
   msg(data.length?'':'No saved letters yet.');
   $('sdl').innerHTML=data.map(l=>'<li><small>'+new Date(l.created_at).toLocaleString()+' · '+(l.kind==='friend'?'for a friend':'for me')+'</small>'+esc(l.body)+'</li>').join('')});
-// after returning from the sign-in link, save the waiting draft
-if(sb)sb.auth.onAuthStateChange(async(ev,ses)=>{
-  let d;try{d=JSON.parse(sessionStorage.getItem('draftLetter')||'null')}catch(_){}
-  if(ses&&d){sessionStorage.removeItem('draftLetter');dlg.classList.add('on');$('sdt').textContent='Welcome back';
-    try{const o=await send(d);msg(o.emailed?'Your letter is saved to your archive and emailed.':'Your letter is saved to your archive.')}catch(e){msg('Could not save: '+(e.message||e))}}});
+// Save the waiting draft after the auth callback releases Supabase's session lock.
+if(sb)sb.auth.onAuthStateChange((ev,ses)=>{
+  if((ev!=='SIGNED_IN'&&ev!=='INITIAL_SESSION')||!ses)return;
+  let d;try{d=JSON.parse(localStorage.getItem('draftLetter')||'null')}catch(_){msg('Could not read your saved draft from this browser.');return}
+  if(!d)return;
+  dlg.classList.add('on');$('sdt').textContent='Welcome back';msg('Saving your letter...');
+  setTimeout(async()=>{
+    try{
+      const o=await send(d);localStorage.removeItem('draftLetter');
+      msg(o.emailed?'Your letter is saved to your archive and emailed.':'Your letter is saved to your archive. The email could not be sent.')
+    }catch(e){msg('Could not save your letter: '+(e.message||e)+'. Your draft is still saved in this browser; press Save to try again.')}
+  },0)
+});
 })();
 </script>
 </body>

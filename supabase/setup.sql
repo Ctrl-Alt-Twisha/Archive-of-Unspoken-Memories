@@ -16,3 +16,9 @@ alter table public.letters enable row level security;
 create policy "read own letters"   on public.letters for select using (auth.uid() = user_id);
 create policy "insert own letters" on public.letters for insert with check (auth.uid() = user_id);
 create policy "delete own letters" on public.letters for delete using (auth.uid() = user_id);
+create policy "update email status own" on public.letters for update
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- The Edge Function only needs to set delivery metadata, not edit letter contents.
+revoke update on public.letters from authenticated;
+grant update (emailed_at) on public.letters to authenticated;

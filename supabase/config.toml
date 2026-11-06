@@ -1,0 +1,4 @@
+project_id = "archive-of-unspoken-memories"
+
+[functions.send-letter]
+verify_jwt = true
