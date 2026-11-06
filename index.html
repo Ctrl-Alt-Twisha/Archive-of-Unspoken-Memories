@@ -887,7 +887,7 @@ $('sdgo').addEventListener('click',async()=>{
       if(error)throw error;
       msg('Check your inbox and tap the link. Your letter will be saved when you return.');return}
     $('sdgo').disabled=true;msg('Saving...');const o=await send(d);retryDraft=null;
-    msg(o.emailed?'Saved to your archive and emailed.':'Saved to your archive. The email could not be sent.');
+    msg(o.emailed?'Saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Saved to your archive. We couldn\u2019t send the email copy this time, but your letter is safe.');
     $('sdhome').hidden=false;
   }catch(e){$('sdgo').disabled=false;msg('Something went wrong: '+explainError(e))}});
 $('sdar').addEventListener('click',()=>openArchive().catch(e=>msg('Could not load your archive: '+e.message)));
@@ -909,7 +909,7 @@ if(sb)sb.auth.onAuthStateChange((ev,ses)=>{
     if(d){
       try{
         const o=await send(d);retryDraft=null;
-        msg(o.emailed?'Your letter is saved to your archive and emailed.':'Your letter is saved to your archive. The email could not be sent.');
+        msg(o.emailed?'Your letter is saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Your letter is saved to your archive. We couldn\u2019t send the email copy this time, but your letter is safe.');
         $('sdhome').hidden=false;
       }catch(e){
         retryDraft=d;
