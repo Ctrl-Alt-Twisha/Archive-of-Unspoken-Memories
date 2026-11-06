@@ -740,7 +740,10 @@ function open(){dlg.classList.add('on');msg('');$('sdl').innerHTML='';
   $('sdgo').disabled=!ready;$('sdar').disabled=!ready;
   $('sdp').textContent=!ready?'Saving is not connected yet. The site owner needs to add the Supabase details.':'We keep a copy in your private archive and email one to you'+(fr?' and your friend.':'.');
   $('sde').readOnly=false;
-  sb&&sb.auth.getUser().then(r=>{const u=r.data.user;if(u){$('sde').value=u.email;$('sde').readOnly=true}})}
+  sb&&sb.auth.getSession().then(({data:{session},error})=>{
+    if(error){msg('Could not check your sign-in status: '+error.message);return}
+    if(session){$('sde').value=session.user.email||'';$('sde').readOnly=true}
+  })}
 function close(){dlg.classList.remove('on');try{$('ink').focus({preventScroll:true})}catch(_){}}
 sl.addEventListener('click',e=>{e.stopPropagation();if(!TW.text.trim())return;open();setTimeout(()=>{try{$('sde').focus()}catch(_){}},60)});
 $('sdx').addEventListener('click',close);
@@ -752,9 +755,9 @@ $('sdgo').addEventListener('click',async()=>{
   if(!ready)return;
   const d={kind:TW.who,body:TW.text,recipient_email:$('sdf').value.trim()||null};
   try{
-    const {data:{user},error:authError}=await sb.auth.getUser();
+    const {data:{session},error:authError}=await sb.auth.getSession();
     if(authError)throw authError;
-    if(!user){
+    if(!session){
       const em=$('sde').value.trim();if(!em){msg('Enter your email first.');return}
       try{localStorage.setItem('draftLetter',JSON.stringify(d))}catch(_){msg('This browser could not keep your draft for sign-in. Please allow site storage and try again.');return}
       msg('Sending you a sign-in link...');
@@ -765,8 +768,9 @@ $('sdgo').addEventListener('click',async()=>{
     msg(o.emailed?'Saved to your archive and emailed.':'Saved to your archive. The email could not be sent.')
   }catch(e){msg('Something went wrong: '+(e.message||e))}});
 $('sdar').addEventListener('click',async()=>{
-  if(!ready)return;const {data:{user}}=await sb.auth.getUser();
-  if(!user){msg('Sign in first (enter your email and press Save).');return}
+  if(!ready)return;const {data:{session},error:sessionError}=await sb.auth.getSession();
+  if(sessionError){msg('Could not check your sign-in status: '+sessionError.message);return}
+  if(!session){msg('Sign in first (enter your email and press Save).');return}
   const {data,error}=await sb.from('letters').select('*').order('created_at',{ascending:false});
   if(error){msg(error.message);return}
   msg(data.length?'':'No saved letters yet.');
