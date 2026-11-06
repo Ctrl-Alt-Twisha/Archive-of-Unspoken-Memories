@@ -770,7 +770,9 @@ const sl=$('savel');
 let mode='save',authFlowStarted=false,retryDraft=null;
 function explainError(e){
   const text=e&&e.message?e.message:String(e);
-  if(/rate limit/i.test(text))return 'Supabase is temporarily limiting sign-in emails. Your letter is still saved in this browser, but has not been added to your archive yet. Wait before requesting another link, or ask the site owner to configure custom SMTP in Supabase.';
+  if(/rate limit/i.test(text))return mode==='archive'
+    ? 'Supabase is temporarily limiting sign-in emails, so no sign-in link was sent and your archive could not be opened. The site owner needs to configure custom SMTP in Supabase before trying again.'
+    : 'Supabase is temporarily limiting sign-in emails. Your letter is still saved in this browser, but has not been added to your archive yet. Wait before requesting another link, or ask the site owner to configure custom SMTP in Supabase.';
   return text;
 }
 setInterval(()=>sl.classList.toggle('show',!!TW.text.trim()),200);
