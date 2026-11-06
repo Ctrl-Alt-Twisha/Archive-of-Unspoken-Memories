@@ -48,7 +48,8 @@ Deno.serve(async (req) => {
       return json({ error: 'Request must contain valid JSON' }, 400)
     }
 
-    const { kind, body, recipient_email } = input
+    // CHANGED: also read recipient_name
+    const { kind, body, recipient_email, recipient_name } = input
     if (typeof body !== 'string' || !body.trim() || body.length > 20000 ||
         (kind !== 'me' && kind !== 'friend')) {
       return json({ error: 'Enter a letter of up to 20,000 characters' }, 400)
@@ -65,6 +66,10 @@ Deno.serve(async (req) => {
         user_id: user.id,
         kind,
         body,
+        // CHANGED: recipient_name is now saved
+        recipient_name: kind === 'friend' && typeof recipient_name === 'string' && recipient_name.trim()
+          ? recipient_name.trim().slice(0, 200)
+          : null,
         recipient_email: kind === 'friend' ? recipient_email ?? null : null,
       })
       .select()
@@ -81,23 +86,29 @@ Deno.serve(async (req) => {
     if (kind === 'friend' && typeof recipient_email === 'string') to.push(recipient_email)
 
     try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: Deno.env.get('FROM_EMAIL') ?? 'Archive of Unspoken Memories <onboarding@resend.dev>',
-          to,
-          subject: 'A letter from the Archive of Unspoken Memories',
-          html: `<div style="font-family:Georgia,serif;max-width:560px;margin:auto;white-space:pre-wrap;line-height:1.6">${esc(body)}</div>`,
-        }),
+      // CHANGED: send each address separately so one failure (e.g. Resend's
+      // test sender rejecting the friend's address) doesn't block your own copy.
+      const send = (address: string) =>
+        fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: Deno.env.get('FROM_EMAIL') ?? 'Archive of Unspoken Memories <onboarding@resend.dev>',
+            to: [address],
+            subject: 'A letter from the Archive of Unspoken Memories',
+            html: `<div style="font-family:Georgia,serif;max-width:560px;margin:auto;white-space:pre-wrap;line-height:1.6">${esc(body)}</div>`,
+          }),
+        })
+
+      const results = await Promise.all(to.map(send))
+      results.forEach((r, i) => {
+        if (!r.ok) console.error('Resend rejected the email to recipient', i, 'status', r.status)
       })
-      if (!res.ok) {
-        console.error('Resend rejected the email:', res.status)
-        return json({ saved: true, emailed: false, id: letter.id })
-      }
+      const anyOk = results.some((r) => r.ok)
+      if (!anyOk) return json({ saved: true, emailed: false, id: letter.id })
 
       const { error: updateError } = await supabase
         .from('letters')
