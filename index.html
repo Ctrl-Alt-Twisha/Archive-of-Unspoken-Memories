@@ -385,7 +385,6 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 <div id="sdlg" role="dialog" aria-modal="true" aria-label="Save your letter"><div class="box">
 <h3 id="sdt">Keep this letter</h3><p id="sdp"></p>
 <input id="sde" type="email" placeholder="Your email" autocomplete="email">
-<input id="sdf" type="email" placeholder="Friend's email (optional)" autocomplete="off" style="display:none">
 <div class="row"><button id="sdgo" type="button">Save</button><button id="sdar" class="alt" type="button">My archive</button><button id="sdhome" class="alt" type="button" hidden>Back to start</button><button id="sdx" class="alt" type="button">Close</button></div>
 <p class="msg" id="sdm" aria-live="polite"></p><button id="sdbk" class="alt" type="button" hidden>Back to archive</button><ul id="sdl"></ul><pre id="sdletter" hidden></pre></div></div>
 <div id="reader" role="dialog" aria-modal="true" aria-label="Your letter"><div class="rdwrap"><button id="rdback" type="button">&larr; Back to archive</button><article id="rdsheet"><p id="rdmeta"></p><div id="rdtext"></div></article></div></div>
@@ -789,11 +788,10 @@ setInterval(()=>sl.classList.toggle('show',!!TW.text.trim()),200);
 function resetModal(){
   dlg.classList.remove('arch');$('sdl').classList.remove('cols');$('sdl').replaceChildren();$('sdletter').hidden=true;$('sdbk').hidden=true;
   $('sdhome').hidden=true;$('sdgo').hidden=false;$('sdar').hidden=false;
-  $('sde').hidden=false;$('sdf').hidden=false;
+  $('sde').hidden=false;
 }
 function open(){mode='save';dlg.classList.add('on');resetModal();msg('');
-  $('sdf').style.display='none';
-  $('sdf').hidden=true;$('sdl').hidden=true;
+  $('sdl').hidden=true;
   $('sdt').textContent='Keep this letter';$('sdgo').textContent='Save';
   $('sdgo').disabled=!ready;$('sdar').disabled=!ready;
   $('sdp').textContent=!ready?'Saving is not connected yet. The site owner needs to add the Supabase details.':(TW.who==='friend'?'We keep a copy in your private archive.':'We keep a copy in your private archive and email one to you.');
@@ -806,7 +804,7 @@ function close(){dlg.classList.remove('on');try{$('ink').focus({preventScroll:tr
 sl.addEventListener('click',e=>{e.stopPropagation();if(!TW.text.trim())return;open();setTimeout(()=>{try{$('sde').focus()}catch(_){}},60)});
 $('sdx').addEventListener('click',close);
 async function showArchive(){
-  mode='archive';dlg.classList.add('on');resetModal();$('sdf').hidden=true;$('sde').hidden=true;$('sdl').hidden=false;
+  mode='archive';dlg.classList.add('on');resetModal();$('sde').hidden=true;$('sdl').hidden=false;
   $('sdt').textContent='Your archive';$('sdp').textContent='Your saved letters are private to your account.';
   $('sdar').hidden=true;$('sdgo').hidden=true;$('sde').hidden=true;
   msg('Loading your saved letters...');
@@ -857,7 +855,7 @@ addEventListener('popstate',()=>closeReader(true));
 addEventListener('keydown',e=>{if(e.key==='Escape')closeReader(false)});
 async function openArchive(){
   if(!ready){dlg.classList.add('on');resetModal();$('sdt').textContent='Your archive';$('sdgo').disabled=true;msg('Saving is not connected yet.');return}
-  mode='archive';dlg.classList.add('on');resetModal();$('sdf').hidden=true;
+  mode='archive';dlg.classList.add('on');resetModal();
   $('sdt').textContent='Your archive';$('sdp').textContent='Enter your email to view your saved letters.';
   $('sdgo').textContent='Send sign-in link';$('sdar').hidden=true;$('sdgo').disabled=false;
   $('sdl').hidden=true;$('sde').readOnly=false;msg('');
@@ -917,13 +915,13 @@ if(sb)sb.auth.onAuthStateChange((ev,ses)=>{
   authFlowStarted=true;
   if(archiveRequested)localStorage.removeItem('openArchiveAfterSignIn');
   if(d)localStorage.removeItem('draftLetter');
-  mode='save';dlg.classList.add('on');resetModal();$('sdf').hidden=true;
+  mode='save';dlg.classList.add('on');resetModal();
   $('sdt').textContent='Welcome back';$('sdp').textContent='';msg(d?'Saving your letter...':'Opening your archive...');
   setTimeout(async()=>{
     if(d){
       try{
         const o=await send(d);retryDraft=null;
-        msg(d.kind==='friend'?'Your letter is saved to your archive.':o.emailed?'Your letter is saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Your letter is saved to your archive.');
+        msg('Your letter is saved to your archive.');
         $('sdhome').hidden=false;
       }catch(e){
         retryDraft=d;
