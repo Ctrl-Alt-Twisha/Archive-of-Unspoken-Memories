@@ -487,12 +487,12 @@ const LOCKS=["images/lock-1.jpg","images/lock-2.jpg","images/lock-3.jpg","images
 const POS=['50% 50%','30% 25%','65% 55%','50% 80%','40% 40%','50% 65%','50% 50%','72% 55%','50% 46%','58% 50%','50% 70%'];
 function throwPhotos(){
   if(wall.childElementCount)return;
-  const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?2:4,rows=Math.ceil(LOCKS.length/cols),cw=W/cols,rh=H/rows;
+  const W=innerWidth,H=innerHeight,mob=W<640,cols=mob?3:6,rows=mob?5:4,cw=W/cols,rh=H/rows;
   let q=5;const R=()=>{q=(q*16807)%2147483647;return(q-1)/2147483646};
   const order=LOCKS.map((_,i)=>i);
   for(let i=order.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
-  for(let n=0;n<LOCKS.length;n++){
-    const r=Math.floor(n/cols),c=n%cols,i=order[n],ar=[.75,.75,1,.62][Math.floor(R()*4)],w=Math.min(230,cw*1.15)*(.85+R()*.25);
+  for(let n=0;n<cols*rows;n++){
+    const r=Math.floor(n/cols),c=n%cols,i=order[n%order.length],ar=[.75,.75,1,.62][Math.floor(R()*4)],w=Math.min(230,cw*1.15)*(.85+R()*.25);
     const x=Math.min(W-w*.4,Math.max(w*.4,(c+.5)*cw+(R()-.5)*cw*.5)),y=(r+.5)*rh+(R()-.5)*rh*.5;
     let dx=x-W/2,dy=y-H/2;const L=Math.hypot(dx,dy)||1,far=Math.max(W,H)*1.1;
     const el=document.createElement('div');el.className='pic';const st=el.style;
