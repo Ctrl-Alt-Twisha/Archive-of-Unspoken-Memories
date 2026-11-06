@@ -299,6 +299,12 @@ body:not(.letter):not(.writing) #prompt.on{left:50%;right:auto;width:max-content
 #sdlg .archive-item:hover,#sdlg .archive-item:focus-visible{background:rgba(194,138,26,.14);outline:2px solid #c28a1a}
 #sdlg .archive-item strong,#sdlg .archive-item span{display:block}
 #sdlg .archive-item span{opacity:.75;font-size:.8rem;margin-top:.2rem}
+#sdlg.arch .box{width:min(94vw,720px)}
+#sdl.cols{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+#sdl.cols>li.col{border:0;padding:0;min-width:0}
+#sdl.cols h4{margin:0 0 .3rem;font-weight:400;font-size:1.05rem;border-bottom:2px solid #5a3a24;padding-bottom:.3rem}
+#sdl.cols .empty{opacity:.6;font-size:.85rem;margin:.5rem 0}
+#sdl.cols ul{margin:0}
 #sdletter{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;border-top:1px dashed #5a3a24;padding-top:.8rem}
 #sdlg button:disabled{opacity:.5;cursor:wait}
 #sdhome[hidden],#sdbk[hidden],#sdletter[hidden],#sdl[hidden],#sdgo[hidden],#sdar[hidden],#sde[hidden]{display:none}
@@ -781,16 +787,16 @@ function explainError(e){
 }
 setInterval(()=>sl.classList.toggle('show',!!TW.text.trim()),200);
 function resetModal(){
-  $('sdl').replaceChildren();$('sdletter').hidden=true;$('sdbk').hidden=true;
+  dlg.classList.remove('arch');$('sdl').classList.remove('cols');$('sdl').replaceChildren();$('sdletter').hidden=true;$('sdbk').hidden=true;
   $('sdhome').hidden=true;$('sdgo').hidden=false;$('sdar').hidden=false;
   $('sde').hidden=false;$('sdf').hidden=false;
 }
 function open(){mode='save';dlg.classList.add('on');resetModal();msg('');
-  const fr=TW.who==='friend';$('sdf').style.display=fr?'block':'none';
-  $('sdf').hidden=!fr;$('sdl').hidden=true;
+  $('sdf').style.display='none';
+  $('sdf').hidden=true;$('sdl').hidden=true;
   $('sdt').textContent='Keep this letter';$('sdgo').textContent='Save';
   $('sdgo').disabled=!ready;$('sdar').disabled=!ready;
-  $('sdp').textContent=!ready?'Saving is not connected yet. The site owner needs to add the Supabase details.':'We keep a copy in your private archive and email one to you'+(fr?' and your friend.':'.');
+  $('sdp').textContent=!ready?'Saving is not connected yet. The site owner needs to add the Supabase details.':(TW.who==='friend'?'We keep a copy in your private archive.':'We keep a copy in your private archive and email one to you.');
   $('sde').readOnly=false;
   sb&&sb.auth.getSession().then(({data:{session},error})=>{
     if(error){msg('Could not check your sign-in status: '+error.message);return}
@@ -809,15 +815,23 @@ async function showArchive(){
   $('sdl').replaceChildren();
   if(!data.length){msg('No saved letters yet.');return}
   msg('');
-  data.forEach(letter=>{
-    const li=document.createElement('li'),button=document.createElement('button');
-    const heading=document.createElement('strong'),preview=document.createElement('span');
-    button.type='button';button.className='archive-item';
-    const first=(letter.body.split('\n').find(l=>l.trim())||'').trim(),ttl=first.length>34?first.slice(0,34).trimEnd()+'…':first;
-    heading.textContent=ttl||'Untitled letter';
-    preview.textContent=new Date(letter.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' · '+(letter.kind==='friend'?'for a friend':'for me');
-    button.append(heading,preview);button.addEventListener('click',()=>openReader(letter));
-    li.append(button);$('sdl').append(li);
+  dlg.classList.add('arch');$('sdl').classList.add('cols');
+  [['me','For me'],['friend','For a friend']].forEach(([kind,label])=>{
+    const col=document.createElement('li'),h=document.createElement('h4'),ul=document.createElement('ul');
+    col.className='col';h.textContent=label;col.append(h,ul);
+    const items=data.filter(l=>(l.kind==='friend'?'friend':'me')===kind);
+    if(!items.length){const e=document.createElement('p');e.className='empty';e.textContent='Nothing here yet.';col.append(e)}
+    items.forEach(letter=>{
+      const li=document.createElement('li'),button=document.createElement('button');
+      const heading=document.createElement('strong'),preview=document.createElement('span');
+      button.type='button';button.className='archive-item';
+      const first=(letter.body.split('\n').find(l=>l.trim())||'').trim(),ttl=first.length>34?first.slice(0,34).trimEnd()+'…':first;
+      heading.textContent=ttl||'Untitled letter';
+      preview.textContent=new Date(letter.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+      button.append(heading,preview);button.addEventListener('click',()=>openReader(letter));
+      li.append(button);ul.append(li);
+    });
+    $('sdl').append(col);
   });
 }
 
@@ -875,7 +889,7 @@ $('sdgo').addEventListener('click',async()=>{
     }catch(e){msg('Something went wrong: '+explainError(e))}
     return;
   }
-  const d=retryDraft||{kind:TW.who,body:TW.text,recipient_email:$('sdf').value.trim()||null};
+  const d=retryDraft||{kind:TW.who,body:TW.text,recipient_email:null};
   try{
     const {data:{session},error:authError}=await sb.auth.getSession();
     if(authError)throw authError;
@@ -887,7 +901,7 @@ $('sdgo').addEventListener('click',async()=>{
       if(error)throw error;
       msg('Check your inbox and tap the link. Your letter will be saved when you return.');return}
     $('sdgo').disabled=true;msg('Saving...');const o=await send(d);retryDraft=null;
-    msg(o.emailed?'Saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Saved to your archive. We couldn\u2019t send the email copy this time, but your letter is safe.');
+    msg(d.kind==='friend'?'Saved to your archive.':o.emailed?'Saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Saved to your archive.');
     $('sdhome').hidden=false;
   }catch(e){$('sdgo').disabled=false;msg('Something went wrong: '+explainError(e))}});
 $('sdar').addEventListener('click',()=>openArchive().catch(e=>msg('Could not load your archive: '+e.message)));
@@ -909,7 +923,7 @@ if(sb)sb.auth.onAuthStateChange((ev,ses)=>{
     if(d){
       try{
         const o=await send(d);retryDraft=null;
-        msg(o.emailed?'Your letter is saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Your letter is saved to your archive. We couldn\u2019t send the email copy this time, but your letter is safe.');
+        msg(d.kind==='friend'?'Your letter is saved to your archive.':o.emailed?'Your letter is saved to your archive and emailed. If you don\u2019t see the email, check your spam or promotions folder.':'Your letter is saved to your archive.');
         $('sdhome').hidden=false;
       }catch(e){
         retryDraft=d;
